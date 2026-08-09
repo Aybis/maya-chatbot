@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router
 from app.api.routes import v1 as v1_public
+from app.api.routes import execute as execute_public
 from app.api.websocket.chat import ws_router
 from app.core.config import settings
 from app.db.database import init_db
@@ -26,6 +27,7 @@ async def startup():
 app.include_router(router, prefix="/api/v1")
 # Public OpenAI-compatible API (org API key auth) at /v1/*
 app.include_router(v1_public.router, prefix="/v1", tags=["public-api"])
+app.include_router(execute_public.router, prefix="/v1", tags=["public-api"])
 app.include_router(ws_router)
 
 

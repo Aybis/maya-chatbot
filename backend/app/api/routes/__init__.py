@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.routes import projects, chat, memory, skills, files, analytics, auth, providers, prompts, api_keys, audit, admin
+from app.api.routes import projects, chat, memory, skills, files, analytics, auth, providers, prompts, api_keys, audit, admin, mcp
 
 router = APIRouter()
 router.include_router(auth.router, prefix="/auth", tags=["auth"])
@@ -12,5 +12,6 @@ router.include_router(prompts.router, prefix="/prompts", tags=["prompts"])
 router.include_router(api_keys.router, prefix="/api-keys", tags=["api-keys"])
 router.include_router(audit.router, prefix="/audit", tags=["audit"])
 router.include_router(admin.router, prefix="/admin", tags=["admin"])
+router.include_router(mcp.router, prefix="/mcp", tags=["mcp"])
 router.include_router(files.router, prefix="/files", tags=["files"])
 router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])

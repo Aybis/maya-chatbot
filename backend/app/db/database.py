@@ -246,6 +246,18 @@ async def init_db():
                 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
                 FOREIGN KEY (user_id) REFERENCES users(id)
             );
+
+            -- MCP Servers (Phase B4): external tool servers per org.
+            CREATE TABLE IF NOT EXISTS mcp_servers (
+                id TEXT PRIMARY KEY,
+                organization_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                url TEXT NOT NULL,                -- base URL of the MCP/tool server
+                enabled BOOLEAN DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+                UNIQUE(organization_id, name)
+            );
             """
         )
         await db.commit()
@@ -260,7 +272,7 @@ async def _ensure_columns(db):
     created by an older schema we add the new columns here. This makes upgrades
     non-destructive.
     """
-    target_tables = ("projects", "conversations", "memories", "skills", "files", "token_usage", "prompt_templates", "api_keys", "audit_logs")
+    target_tables = ("projects", "conversations", "memories", "skills", "files", "token_usage", "prompt_templates", "api_keys", "audit_logs", "mcp_servers")
     for table in target_tables:
         cur = await db.execute(f"PRAGMA table_info({table})")
         cols = {row[1] for row in await cur.fetchall()}
@@ -288,7 +300,7 @@ async def _migrate_legacy(db):
     if len(orgs) != 1:
         return
     org_id = orgs[0]["id"]
-    for table in ("projects", "conversations", "memories", "skills", "files", "token_usage", "prompt_templates", "api_keys", "audit_logs"):
+    for table in ("projects", "conversations", "memories", "skills", "files", "token_usage", "prompt_templates", "api_keys", "audit_logs", "mcp_servers"):
         try:
             await db.execute(
                 f"UPDATE {table} SET organization_id = ? WHERE organization_id IS NULL",

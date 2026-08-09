@@ -158,3 +158,19 @@ class AuditLog(BaseModel):
     user_agent: Optional[str] = None
     metadata: dict = {}
     created_at: datetime
+
+
+class McpServerBase(BaseModel):
+    name: str
+    url: str
+    enabled: bool = True
+
+
+class McpServerCreate(McpServerBase):
+    pass
+
+
+class McpServer(McpServerBase):
+    id: str
+    organization_id: str
+    created_at: datetime

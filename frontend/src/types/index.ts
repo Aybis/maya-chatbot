@@ -103,3 +103,18 @@ export interface AuditLog {
   metadata: Record<string, unknown>
   created_at: string
 }
+
+export interface McpServer {
+  id: string
+  organization_id: string
+  name: string
+  url: string
+  enabled: boolean
+  created_at: string
+}
+
+export interface McpTool {
+  name: string
+  description: string
+  parameters: Record<string, unknown>
+}

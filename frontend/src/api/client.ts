@@ -1,4 +1,4 @@
-import type { Project, Conversation, Message, Memory, Skill, PromptTemplate, ApiKey, ApiKeyCreated, AuditLog } from '../types'
+import type { Project, Conversation, Message, Memory, Skill, PromptTemplate, ApiKey, ApiKeyCreated, AuditLog, McpServer, McpTool } from '../types'
 import { useAuthStore, type User, type Organization } from '../stores/auth'
 
 const BASE_URL = '/api/v1'
@@ -159,6 +159,14 @@ export const api = {
 
   // ── Admin ──
   getAdminSummary: () => fetchApi<AdminSummary>('/admin/summary'),
+
+  // ── MCP ──
+  getMcpServers: () => fetchApi<McpServer[]>('/mcp/'),
+  createMcpServer: (data: { name: string; url: string; enabled?: boolean }) =>
+    fetchApi<McpServer>('/mcp/', { method: 'POST', body: JSON.stringify(data) }),
+  deleteMcpServer: (id: string) => fetchApi(`/mcp/${id}`, { method: 'DELETE' }),
+  toggleMcpServer: (id: string) => fetchApi<McpServer>(`/mcp/${id}/toggle`, { method: 'POST' }),
+  getMcpTools: (id: string) => fetchApi<{ server: string; tools: McpTool[] }>(`/mcp/${id}/tools`),
 
   // ── Files ──
   uploadFile: (file: File, conversationId?: string) => {

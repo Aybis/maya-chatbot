@@ -6,15 +6,17 @@
 
 ## Current Status
 
-**Phase:** B — IN PROGRESS (B1, B2, B3, B6 done; B4 MCP + B5 Code Sandbox remaining)
-**Last updated:** Phase B, B6 done
+**Phase:** B — COMPLETE. All six features (B1–B6) done, verified, committed.
+**Last updated:** Phase B complete
 
 <!-- UPDATE BELOW as you work. Keep this section current. -->
 
 ### In Progress
-- (none — B1, B2, B3, B6 complete; B4 + B5 remaining)
+- (none — Phase B complete)
 
 ### Completed
+- [x] **B4 MCP Support** — `mcp_servers` table (org-scoped, name+url+enabled, unique per org); `services/mcp.py` lightweight HTTP tool client (`list_tools` tries `/tools`, `/tools/list`, `/list_tools`; `invoke_tool` tries `/tools/{n}/invoke`, `/call`, `/tools/call` — defensive, returns `[]`/`{error}` for unknown servers); `/api/v1/mcp/` CRUD + toggle + `/{id}/tools` + `/{id}/tools/{name}/invoke`. McpPage (`/app/mcp`) — server list, add/enable/disable/delete, expandable tools panel with refresh; sidebar entry. Verified: create/list/toggle/delete, tools endpoint graceful on unreachable server.
+- [x] **B5 Code Execution Sandbox** — `services/sandbox.py`: subprocess exec (python/js via `shutil.which`-resolved absolute path), rlimits (CPU/mem/fsize/core/nproc, each guarded — macOS-safe), wall-clock timeout (default 10s, max 30s, `RLIMIT_CPU` backstop), 64KB stdout/stderr caps, tempdir cwd, minimal env with runtime dir on PATH. `/v1/execute` (mounted at `/v1`) accepts **both** org API key (`maya_...`) and JWT access token. Verified: python 200 `hello`, js 200 `hello js 4`, exit_code passthrough (3), timeout `timed_out:true`, unsupported-lang 400, no-auth 401, JWT path 200.
 - [x] **B6 Admin Console** — `/api/v1/admin/summary` (admin/owner gated): org info+plan, counts (members/pending invites/active keys/providers/conversations/prompts/audit events), all-time usage (cost + tokens). AdminPage (`/app/admin`) — org header w/ plan badge, 3-stat usage strip, clickable stat cards routing to sub-pages, audit-logs link, 403 access-denied state; sidebar entry. Verified: owner gets 200 summary, member gets 403, `npm run build` clean.
 - [x] **B3 Audit Logs** — `audit_logs` table (org-scoped; action/resource/ip/user_agent/metadata JSON); `services/audit.py` `log_audit()` (fire-and-forget, never raises). Wired into: register, login, org.create, member.invite/role_change/remove, api_key.create/revoke, provider.add/remove. `/api/v1/audit/` list (paginated, `?action=` filter, admin/owner gated via `role_at_least`) + `/audit/actions`. AuditLogsPage (`/app/audit`) — table with color-coded action badges, action filter chips, 403 access-denied state for non-admins; sidebar entry. Verified: all 6 action types recorded (org.create correctly logged to the newly-created org), filter + actions endpoints work, `npm run build` clean.
 - [x] **B2 API Keys + OpenAI-compatible `/v1/chat/completions`** — `api_keys` table (SHA-256 hash only, `prefix` for display, revoked/expires/last_used); `services/api_keys.py` (generate/hash/resolve/touch); `/api/v1/api-keys/` create→show-once/list/revoke; public `/v1/chat/completions` (mounted at app root, `Authorization: Bearer maya_...`, resolves org from key, routes via org provider registry, OpenAI SSE chunks for `stream:true`). ApiKeysPage (`/app/api-keys`) with one-time-secret banner + copy + revoke; sidebar entry. Verified: create→list (no plaintext leak)→no-auth 401→bad-key 401→live non-stream 200 "PONG"→live stream SSE `[DONE]`→revoke→401.
