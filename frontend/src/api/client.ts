@@ -1,4 +1,4 @@
-import type { Project, Conversation, Message, Memory, Skill, PromptTemplate } from '../types'
+import type { Project, Conversation, Message, Memory, Skill, PromptTemplate, ApiKey, ApiKeyCreated } from '../types'
 import { useAuthStore, type User, type Organization } from '../stores/auth'
 
 const BASE_URL = '/api/v1'
@@ -140,6 +140,12 @@ export const api = {
   createPrompt: (data: Partial<PromptTemplate>) => fetchApi<PromptTemplate>('/prompts/', { method: 'POST', body: JSON.stringify(data) }),
   updatePrompt: (id: string, data: Partial<PromptTemplate>) => fetchApi<PromptTemplate>(`/prompts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deletePrompt: (id: string) => fetchApi(`/prompts/${id}`, { method: 'DELETE' }),
+
+  // ── API Keys ──
+  getApiKeys: () => fetchApi<ApiKey[]>('/api-keys/'),
+  createApiKey: (data: { name: string; expires_at?: string | null }) =>
+    fetchApi<ApiKeyCreated>('/api-keys/', { method: 'POST', body: JSON.stringify(data) }),
+  revokeApiKey: (id: string) => fetchApi(`/api-keys/${id}`, { method: 'DELETE' }),
 
   // ── Files ──
   uploadFile: (file: File, conversationId?: string) => {

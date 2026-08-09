@@ -117,3 +117,31 @@ class PromptTemplate(PromptTemplateBase):
     created_by: Optional[str] = None
     created_at: datetime
     updated_at: datetime
+
+
+class ApiKeyCreate(BaseModel):
+    name: str
+    expires_at: Optional[datetime] = None
+
+
+class ApiKeyCreated(BaseModel):
+    """Returned once at creation — includes the plaintext key."""
+    id: str
+    name: str
+    key: str            # plaintext — shown ONCE, never stored
+    prefix: str
+    expires_at: Optional[datetime] = None
+    created_at: datetime
+
+
+class ApiKey(BaseModel):
+    """List view — never includes the plaintext or the hash."""
+    id: str
+    organization_id: str
+    name: str
+    prefix: str
+    created_by: Optional[str] = None
+    last_used_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
+    revoked: bool
+    created_at: datetime

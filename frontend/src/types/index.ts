@@ -69,3 +69,24 @@ export interface PromptTemplate {
   created_at: string
   updated_at: string
 }
+
+export interface ApiKey {
+  id: string
+  organization_id: string
+  name: string
+  prefix: string
+  created_by: string | null
+  last_used_at: string | null
+  expires_at: string | null
+  revoked: boolean
+  created_at: string
+}
+
+export interface ApiKeyCreated {
+  id: string
+  name: string
+  key: string
+  prefix: string
+  expires_at: string | null
+  created_at: string
+}

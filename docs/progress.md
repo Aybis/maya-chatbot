@@ -6,15 +6,16 @@
 
 ## Current Status
 
-**Phase:** B — IN PROGRESS (B1 Prompt Library complete; B2 API Keys next)
-**Last updated:** Phase B, B1 done
+**Phase:** B — IN PROGRESS (B1 Prompt Library + B2 API Keys done; B3 Audit Logs next)
+**Last updated:** Phase B, B2 done
 
 <!-- UPDATE BELOW as you work. Keep this section current. -->
 
 ### In Progress
-- **B1 Prompt Library** — DONE (backend + frontend + verified). See Completed.
+- (none — B1, B2 complete; B3 next)
 
 ### Completed
+- [x] **B2 API Keys + OpenAI-compatible `/v1/chat/completions`** — `api_keys` table (SHA-256 hash only, `prefix` for display, revoked/expires/last_used); `services/api_keys.py` (generate/hash/resolve/touch); `/api/v1/api-keys/` create→show-once/list/revoke; public `/v1/chat/completions` (mounted at app root, `Authorization: Bearer maya_...`, resolves org from key, routes via org provider registry, OpenAI SSE chunks for `stream:true`). ApiKeysPage (`/app/api-keys`) with one-time-secret banner + copy + revoke; sidebar entry. Verified: create→list (no plaintext leak)→no-auth 401→bad-key 401→live non-stream 200 "PONG"→live stream SSE `[DONE]`→revoke→401.
 - [x] **B1 Prompt Library** — `prompt_templates` table (org-scoped, categories + variables JSON + is_public); CRUD routes at `/api/v1/prompts/` (+ list-by-category, `/categories`, PUT update); PromptsPage (`/app/prompts`) with category filter, create/edit/delete/copy; sidebar entry. Verified end-to-end via live API (create/list/get/update/by-category/categories/delete) + `npm run build` (tsc clean).
 - [x] Project recon
 - [x] Docs scaffold (this file + AGENTS.md + ARCHITECT.md + SKILLS.md)
