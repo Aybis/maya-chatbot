@@ -11,6 +11,7 @@ A full-featured Claude-style AI chat application with multi-provider support, re
 | [`docs/AGENTS.md`](docs/AGENTS.md) | Guidance for AI coding agents working in this repo |
 | [`docs/SKILLS.md`](docs/SKILLS.md) | Index of skills + design knowledge |
 | [`docs/progress.md`](docs/progress.md) | **Live progress log** — read this to resume work |
+| [`docs/phase-b-plan.md`](docs/phase-b-plan.md) | **Phase B work order** — Claude features + B2B services |
 | [`backend/README.md`](backend/README.md) | Backend setup, config, API reference, multi-tenancy |
 
 **Skills** (single consolidated folder): [`skills/`](skills/) — `maya-chat-setup`, `maya-chat-feature`, `frontend-design`.

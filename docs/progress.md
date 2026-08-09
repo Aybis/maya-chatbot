@@ -6,30 +6,29 @@
 
 ## Current Status
 
-**Phase:** A — Multi-tenant foundation & B2B SaaS architecture
-**Last updated:** Session start (Phase A)
+**Phase:** A — COMPLETE. Ready for Phase B (Claude features).
+**Last updated:** End of Phase A (before Phase B)
 
 <!-- UPDATE BELOW as you work. Keep this section current. -->
 
 ### In Progress
-- [ ] Frontend multi-tenant UI (org switcher, team, roles)
-- [ ] End-to-end verification
+- (none — starting Phase B)
 
 ### Completed
 - [x] Project recon
-- [x] Docs scaffold (this file + agents.md + skills.md + architect.md)
+- [x] Docs scaffold (this file + AGENTS.md + ARCHITECT.md + SKILLS.md)
 - [x] Design direction locked (taste-skill: minimalist/premium, VARIANCE 5 / MOTION 3 / DENSITY 2)
 - [x] **Phase A backend: multi-tenant schema** — organizations, memberships (RBAC owner/admin/member), invitations, schema_migrations, org_id on all resources
 - [x] **Phase A auth upgrade** — access + refresh JWT, org context dependency (`X-Org-Id` header / token claim), org CRUD + members + invitations routes
 - [x] **Org-scoped API routes** — projects, conversations, memory, skills, files, analytics, WebSocket all scoped to org
 - [x] **Dynamic provider registry** — `providers` + `provider_models` tables; base_url + api_key; auto-discover models from `/models` endpoint; capability inference (reasoning, vision, audio, file, multimodal, context window); LLM service routes via DB registry
-- [x] **All libraries latest + 0 vulns** — backend (fastapi 0.128, uvicorn 0.39, pydantic 2.13, httpx 0.28, openai 2.48, anthropic 0.121); frontend (React 19.2, Vite 8.2, TS 7.0, router 7.18, Tailwind 4.3). Fixed TS7 type errors, build passes, `npm audit` 0 vulnerabilities.
-- [x] **Design system** — white minimalist premium tokens (canvas #FFFFFF, surface #F9F9F8, hairline #EAEAEA, ink #111111, muted #787774, accent #4a6cf7), Geist Variable + Geist Mono fonts, Phosphor icons, `.hairline`/`.lift`/`.reveal` utilities. Legacy warm/cream palette kept for app pages during transition.
-- [x] **Enterprise landing page** — mobbin-caliber public site at `/` (nav, hero, product preview mockup, 6 capabilities grid, provider showcase, dark enterprise section, 3-tier pricing, CTA, footer). Agentic messaging throughout. App moved to `/app/*`.
-- [x] **Bug fixes (login redirect + broken menus)** — root causes: (1) React Query `useQuery` was used without a `QueryClientProvider` wrapper → every data page crashed/blanked; wrapped in `main.tsx`. (2) API collection routes called without trailing slashes → FastAPI 307-redirects and drops auth headers → 401 → session bounce; added trailing slashes to `client.ts`. (3) WebSocket connected without auth token → closes with "Unauthorized"; now passes `?token=` in `useWebSocket`.
-- [x] **Design system applied to all app pages** — Chat, Projects, Memory, Skills, Analytics, Settings, Team, Providers, Layout, ChatInput/Message, CodeBlock, ArtifactRenderer all migrated off the old warm/cream/amber palette + Lucide to the new tokens + Phosphor. Removed `lucide-react` dependency.
-- [x] **Maya logo applied** — landing nav/footer, login, register, sidebar, favicon, chat avatar.
-- [x] **Docs reorganized** — moved `AGENTS.md`, `ARCHITECT.md`, `SKILLS.md`, `progress.md` into `docs/`. Consolidated duplicate `.claude/skills` + `.codex/skills` into one `skills/` folder. Added `backend/README.md` (setup, config, API reference, multi-tenancy). Updated root `README.md` doc index.
+- [x] **All libraries latest + 0 vulns** — backend (fastapi 0.128, uvicorn 0.39, pydantic 2.13, httpx 0.28, openai 2.48, anthropic 0.121, cryptography 50); frontend (React 19.2, Vite 8.2, TS 7.0, router 7.18, Tailwind 4.3). `npm audit` 0 vulns.
+- [x] **Design system** — white minimalist premium tokens, Geist fonts, Phosphor icons, `.hairline`/`.lift`/`.reveal` utilities
+- [x] **Enterprise landing page** — public at `/`, app at `/app/*`
+- [x] **Bug fixes** — QueryClientProvider wrapper (crashes), trailing-slash API routes (401 redirect), WebSocket token auth, org-context fallback (stale-token 400), legacy-account org auto-create (403), provider-add clear error msg
+- [x] **Design system applied to all app pages** — all migrated to tokens + Phosphor; lucide-react removed
+- [x] **Maya logo applied** — nav, login, register, sidebar, favicon, chat avatar
+- [x] **Docs reorganized** — all MD in `docs/`, skills consolidated in `skills/`, `backend/README.md` added
 
 ---
 
