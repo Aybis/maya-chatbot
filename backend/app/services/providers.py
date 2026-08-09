@@ -26,8 +26,26 @@ CAPABILITY_HINTS = [
 ]
 
 # Model-id patterns that imply a capability even without a hint.
-VISION_IDS = ("vision", "vl", "-v-", "_v_", "omni", "minicpm-v", "qwen-vl", "llava", "gpt-4o", "claude-3-5-sonnet", "claude-3-opus", "gemini-1.5-pro", "gemini-2")
-AUDIO_IDS = ("audio", "voice", "whisper", "tts", "speech", "realtime")
+# These are matched as substrings against the lowercased model id. Keep them
+# current — providers rarely return capability metadata, so this list is the
+# primary signal for well-known multimodal families.
+VISION_IDS = (
+    # explicit vision markers
+    "vision", "vl", "-v-", "_v_", "omni", "minicpm-v", "qwen-vl", "llava",
+    # OpenAI multimodal families (gpt-4o, gpt-4.1, gpt-5.x are vision+ audio-capable)
+    "gpt-4o", "gpt-4.1", "gpt-5", "o1", "o3", "o4",
+    # Anthropic — all Claude 3+ models are vision-capable
+    "claude-3", "claude-4", "claude-5", "claude-opus", "claude-sonnet", "claude-haiku",
+    # Google Gemini (1.5+ / 2.x are natively multimodal)
+    "gemini-1.5", "gemini-2", "gemini-pro",
+    # Qwen Max / flagship multimodal
+    "qwen-3", "qwen-max", "qwen2.5", "qwen3",
+    # Kimi (Moonshot) multimodal
+    "kimi",
+    # GLM-4V+ / GLM-5 multimodal
+    "glm-4v", "glm-5",
+)
+AUDIO_IDS = ("audio", "voice", "whisper", "tts", "speech", "realtime", "gpt-4o", "gpt-5")
 FILE_IDS = ("file", "doc", "pdf", "tool", "agent", "coding", "code")
 
 
