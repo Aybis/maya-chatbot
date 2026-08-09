@@ -15,6 +15,12 @@ from app.db.database import get_db
 ROLE_ORDER = {"member": 1, "admin": 2, "owner": 3}
 
 
+def _slugify(name: str) -> str:
+    import re
+    slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    return slug or "org" + secrets.token_hex(3)
+
+
 def role_at_least(role: str, minimum: str) -> bool:
     """True if ``role`` grants at least ``minimum`` privileges."""
     return ROLE_ORDER.get(role, 0) >= ROLE_ORDER.get(minimum, 0)
@@ -63,6 +69,21 @@ async def list_user_orgs(db, user_id: str) -> list[dict]:
     )
     rows = await cur.fetchall()
     return [dict(r) for r in rows]
+
+
+async def ensure_user_org(db, user_id: str, username: str = "") -> str:
+    """Return the user's first org, auto-creating a personal one if they have none.
+
+    Handles legacy accounts created before the multi-tenant migration (which
+    auto-created an org on register). Guarantees every user has at least one org.
+    """
+    orgs = await list_user_orgs(db, user_id)
+    if orgs:
+        return orgs[0]["id"]
+    name = f"{username or 'User'}'s Workspace" if username else "My Workspace"
+    org = await create_organization(db, name, _slugify(name), user_id)
+    await db.commit()
+    return org["id"]
 
 
 async def list_org_members(db, org_id: str) -> list[dict]:

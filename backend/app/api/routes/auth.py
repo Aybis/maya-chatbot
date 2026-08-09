@@ -17,6 +17,7 @@ from app.services.organizations import (
     accept_invitation,
     create_invitation,
     create_organization,
+    ensure_user_org,
     get_organization,
     get_membership,
     list_org_members,
@@ -97,6 +98,8 @@ async def login(request: dict):
         if not row or not verify_password(password, row["password_hash"]):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
+        # Ensure legacy users (pre-multi-tenant) have an org.
+        await ensure_user_org(db, row["id"], row["username"])
         orgs = await list_user_orgs(db, row["id"])
         active_org = orgs[0]["id"] if orgs else None
         return {
@@ -132,6 +135,7 @@ async def get_me(user_id: str = Depends(get_current_user)):
         row = await cursor.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="User not found")
+        await ensure_user_org(db, user_id, row["username"])
         orgs = await list_user_orgs(db, user_id)
         return {
             "id": row["id"],
