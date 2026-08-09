@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import ChatMessage from '../components/ChatMessage'
 import ChatInput from '../components/ChatInput'
+import ModelPicker from '../components/ModelPicker'
 import { useWebSocket } from '../hooks/useWebSocket'
 import { Message } from '../types'
 import { api } from '../api/client'
@@ -16,8 +17,16 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [conversationId, setConversationId] = useState<string>('')
   const [isTyping, setIsTyping] = useState(false)
+  const [model, setModel] = useState<string>(
+    () => localStorage.getItem('chat_model') || ''
+  )
   const orgId = useAuthStore((s) => s.activeOrgId)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const handleModelChange = (m: string) => {
+    setModel(m)
+    localStorage.setItem('chat_model', m)
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -30,9 +39,10 @@ export default function ChatPage() {
   useEffect(() => {
     if (!orgId) return
     // Create a new conversation on mount (org-scoped)
-    api.createConversation({ title: 'New Chat', model: '' }).then((conv) => {
+    api.createConversation({ title: 'New Chat', model: model || '' }).then((conv) => {
       setConversationId(conv.id)
     }).catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orgId])
 
   const { send } = useWebSocket({
@@ -87,7 +97,7 @@ export default function ChatPage() {
     send({
       conversation_id: conversationId,
       message: content,
-      model: '',
+      model: model || '',
       attachments: userMsg.attachments,
     })
   }
@@ -136,6 +146,12 @@ export default function ChatPage() {
       {/* Input Area */}
       <div className="border-t border-line bg-canvas p-4">
         <div className="mx-auto max-w-3xl">
+          <div className="mb-2 flex items-center justify-between">
+            <ModelPicker value={model} onChange={handleModelChange} />
+            {model && (
+              <span className="font-mono text-[11px] text-muted-2">{model}</span>
+            )}
+          </div>
           <ChatInput onSend={handleSend} />
           <p className="mt-3 text-center text-xs text-muted-2">
             Maya can make mistakes. Please verify important information.
