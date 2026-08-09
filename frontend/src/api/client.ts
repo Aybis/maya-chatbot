@@ -157,6 +157,9 @@ export const api = {
   },
   getAuditActions: () => fetchApi<string[]>('/audit/actions'),
 
+  // ── Admin ──
+  getAdminSummary: () => fetchApi<AdminSummary>('/admin/summary'),
+
   // ── Files ──
   uploadFile: (file: File, conversationId?: string) => {
     const formData = new FormData()
@@ -195,6 +198,24 @@ export interface UsageSummary {
     completion_tokens: number
     cost: number
   }>
+}
+
+export interface AdminSummary {
+  organization: { id: string; name: string; slug: string; plan: string }
+  counts: {
+    members: number
+    pending_invites: number
+    api_keys: number
+    providers: number
+    conversations: number
+    prompts: number
+    audit_events: number
+  }
+  usage: {
+    total_cost: number
+    prompt_tokens: number
+    completion_tokens: number
+  }
 }
 
 export interface DailyUsage {

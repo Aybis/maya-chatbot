@@ -9,6 +9,7 @@ import SkillsPage from './pages/SkillsPage'
 import PromptsPage from './pages/PromptsPage'
 import ApiKeysPage from './pages/ApiKeysPage'
 import AuditLogsPage from './pages/AuditLogsPage'
+import AdminPage from './pages/AdminPage'
 import AnalyticsPage from './pages/AnalyticsPage'
 import SettingsPage from './pages/SettingsPage'
 import TeamPage from './pages/TeamPage'
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/app/prompts" element={<PromptsPage />} />
           <Route path="/app/api-keys" element={<ApiKeysPage />} />
           <Route path="/app/audit" element={<AuditLogsPage />} />
+          <Route path="/app/admin" element={<AdminPage />} />
           <Route path="/app/analytics" element={<AnalyticsPage />} />
           <Route path="/app/team" element={<TeamPage />} />
           <Route path="/app/providers" element={<ProvidersPage />} />

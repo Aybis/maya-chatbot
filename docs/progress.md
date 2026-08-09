@@ -6,15 +6,16 @@
 
 ## Current Status
 
-**Phase:** B — IN PROGRESS (B1, B2, B3 done; B6 Admin Console next, then B4 MCP / B5 Sandbox)
-**Last updated:** Phase B, B3 done
+**Phase:** B — IN PROGRESS (B1, B2, B3, B6 done; B4 MCP + B5 Code Sandbox remaining)
+**Last updated:** Phase B, B6 done
 
 <!-- UPDATE BELOW as you work. Keep this section current. -->
 
 ### In Progress
-- (none — B1, B2, B3 complete; B6 next)
+- (none — B1, B2, B3, B6 complete; B4 + B5 remaining)
 
 ### Completed
+- [x] **B6 Admin Console** — `/api/v1/admin/summary` (admin/owner gated): org info+plan, counts (members/pending invites/active keys/providers/conversations/prompts/audit events), all-time usage (cost + tokens). AdminPage (`/app/admin`) — org header w/ plan badge, 3-stat usage strip, clickable stat cards routing to sub-pages, audit-logs link, 403 access-denied state; sidebar entry. Verified: owner gets 200 summary, member gets 403, `npm run build` clean.
 - [x] **B3 Audit Logs** — `audit_logs` table (org-scoped; action/resource/ip/user_agent/metadata JSON); `services/audit.py` `log_audit()` (fire-and-forget, never raises). Wired into: register, login, org.create, member.invite/role_change/remove, api_key.create/revoke, provider.add/remove. `/api/v1/audit/` list (paginated, `?action=` filter, admin/owner gated via `role_at_least`) + `/audit/actions`. AuditLogsPage (`/app/audit`) — table with color-coded action badges, action filter chips, 403 access-denied state for non-admins; sidebar entry. Verified: all 6 action types recorded (org.create correctly logged to the newly-created org), filter + actions endpoints work, `npm run build` clean.
 - [x] **B2 API Keys + OpenAI-compatible `/v1/chat/completions`** — `api_keys` table (SHA-256 hash only, `prefix` for display, revoked/expires/last_used); `services/api_keys.py` (generate/hash/resolve/touch); `/api/v1/api-keys/` create→show-once/list/revoke; public `/v1/chat/completions` (mounted at app root, `Authorization: Bearer maya_...`, resolves org from key, routes via org provider registry, OpenAI SSE chunks for `stream:true`). ApiKeysPage (`/app/api-keys`) with one-time-secret banner + copy + revoke; sidebar entry. Verified: create→list (no plaintext leak)→no-auth 401→bad-key 401→live non-stream 200 "PONG"→live stream SSE `[DONE]`→revoke→401.
 - [x] **B1 Prompt Library** — `prompt_templates` table (org-scoped, categories + variables JSON + is_public); CRUD routes at `/api/v1/prompts/` (+ list-by-category, `/categories`, PUT update); PromptsPage (`/app/prompts`) with category filter, create/edit/delete/copy; sidebar entry. Verified end-to-end via live API (create/list/get/update/by-category/categories/delete) + `npm run build` (tsc clean).
