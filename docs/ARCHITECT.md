@@ -75,7 +75,7 @@ All currently keyed off `user_id` — **single tenant.**
 
 ## Design Tokens (Phase A frontend)
 
-Reference: progress.md → Design Direction. Locked values:
+Reference: docs/progress.md → Design Direction. Locked values:
 
 | Token | Value |
 |-------|-------|

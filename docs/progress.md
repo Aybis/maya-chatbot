@@ -26,6 +26,10 @@
 - [x] **All libraries latest + 0 vulns** — backend (fastapi 0.128, uvicorn 0.39, pydantic 2.13, httpx 0.28, openai 2.48, anthropic 0.121); frontend (React 19.2, Vite 8.2, TS 7.0, router 7.18, Tailwind 4.3). Fixed TS7 type errors, build passes, `npm audit` 0 vulnerabilities.
 - [x] **Design system** — white minimalist premium tokens (canvas #FFFFFF, surface #F9F9F8, hairline #EAEAEA, ink #111111, muted #787774, accent #4a6cf7), Geist Variable + Geist Mono fonts, Phosphor icons, `.hairline`/`.lift`/`.reveal` utilities. Legacy warm/cream palette kept for app pages during transition.
 - [x] **Enterprise landing page** — mobbin-caliber public site at `/` (nav, hero, product preview mockup, 6 capabilities grid, provider showcase, dark enterprise section, 3-tier pricing, CTA, footer). Agentic messaging throughout. App moved to `/app/*`.
+- [x] **Bug fixes (login redirect + broken menus)** — root causes: (1) React Query `useQuery` was used without a `QueryClientProvider` wrapper → every data page crashed/blanked; wrapped in `main.tsx`. (2) API collection routes called without trailing slashes → FastAPI 307-redirects and drops auth headers → 401 → session bounce; added trailing slashes to `client.ts`. (3) WebSocket connected without auth token → closes with "Unauthorized"; now passes `?token=` in `useWebSocket`.
+- [x] **Design system applied to all app pages** — Chat, Projects, Memory, Skills, Analytics, Settings, Team, Providers, Layout, ChatInput/Message, CodeBlock, ArtifactRenderer all migrated off the old warm/cream/amber palette + Lucide to the new tokens + Phosphor. Removed `lucide-react` dependency.
+- [x] **Maya logo applied** — landing nav/footer, login, register, sidebar, favicon, chat avatar.
+- [x] **Docs reorganized** — moved `AGENTS.md`, `ARCHITECT.md`, `SKILLS.md`, `progress.md` into `docs/`. Consolidated duplicate `.claude/skills` + `.codex/skills` into one `skills/` folder. Added `backend/README.md` (setup, config, API reference, multi-tenancy). Updated root `README.md` doc index.
 
 ---
 

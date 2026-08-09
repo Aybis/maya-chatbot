@@ -2,6 +2,19 @@
 
 A full-featured Claude-style AI chat application with multi-provider support, real-time streaming, and token usage tracking.
 
+> **Maya is now a multi-tenant B2B SaaS platform.** See the docs below.
+
+## 📚 Documentation (all in `docs/`)
+| Doc | Purpose |
+|-----|---------|
+| [`docs/ARCHITECT.md`](docs/ARCHITECT.md) | Architecture, multi-tenancy model, design tokens |
+| [`docs/AGENTS.md`](docs/AGENTS.md) | Guidance for AI coding agents working in this repo |
+| [`docs/SKILLS.md`](docs/SKILLS.md) | Index of skills + design knowledge |
+| [`docs/progress.md`](docs/progress.md) | **Live progress log** — read this to resume work |
+| [`backend/README.md`](backend/README.md) | Backend setup, config, API reference, multi-tenancy |
+
+**Skills** (single consolidated folder): [`skills/`](skills/) — `maya-chat-setup`, `maya-chat-feature`, `frontend-design`.
+
 ![Maya Chat](https://via.placeholder.com/800x400/f5a623/ffffff?text=Maya+Chat)
 
 ## Features

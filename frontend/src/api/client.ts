@@ -89,9 +89,9 @@ export const api = {
     fetchApi(`/auth/organizations/${orgId}/members/${userId}`, { method: 'DELETE' }),
 
   // ── Providers ──
-  getProviders: () => fetchApi<Provider[]>('/providers'),
+  getProviders: () => fetchApi<Provider[]>('/providers/'),
   addProvider: (data: { name: string; base_url: string; api_key: string }) =>
-    fetchApi<Provider>('/providers', { method: 'POST', body: JSON.stringify(data) }),
+    fetchApi<Provider>('/providers/', { method: 'POST', body: JSON.stringify(data) }),
   refreshProviderModels: (providerId: string) =>
     fetchApi(`/providers/${providerId}/models/refresh`, { method: 'POST' }),
   deleteProvider: (providerId: string) =>
@@ -101,26 +101,26 @@ export const api = {
   getModels: () => fetchApi<ModelInfo[]>('/providers/models'),
 
   // ── Projects ──
-  getProjects: () => fetchApi<Project[]>('/projects'),
-  createProject: (data: Partial<Project>) => fetchApi<Project>('/projects', { method: 'POST', body: JSON.stringify(data) }),
+  getProjects: () => fetchApi<Project[]>('/projects/'),
+  createProject: (data: Partial<Project>) => fetchApi<Project>('/projects/', { method: 'POST', body: JSON.stringify(data) }),
   deleteProject: (id: string) => fetchApi(`/projects/${id}`, { method: 'DELETE' }),
 
   // ── Conversations ──
-  getConversations: (projectId?: string) => fetchApi<Conversation[]>(`/chat/conversations${projectId ? `?project_id=${projectId}` : ''}`),
-  createConversation: (data: Partial<Conversation>) => fetchApi<Conversation>('/chat/conversations', { method: 'POST', body: JSON.stringify(data) }),
+  getConversations: (projectId?: string) => fetchApi<Conversation[]>(`/chat/conversations/${projectId ? `?project_id=${projectId}` : ''}`),
+  createConversation: (data: Partial<Conversation>) => fetchApi<Conversation>('/chat/conversations/', { method: 'POST', body: JSON.stringify(data) }),
   deleteConversation: (id: string) => fetchApi(`/chat/conversations/${id}`, { method: 'DELETE' }),
 
   // ── Messages ──
   getMessages: (conversationId: string) => fetchApi<Message[]>(`/chat/conversations/${conversationId}/messages`),
 
   // ── Memories ──
-  getMemories: () => fetchApi<Memory[]>('/memory'),
-  createMemory: (data: Partial<Memory>) => fetchApi<Memory>('/memory', { method: 'POST', body: JSON.stringify(data) }),
+  getMemories: () => fetchApi<Memory[]>('/memory/'),
+  createMemory: (data: Partial<Memory>) => fetchApi<Memory>('/memory/', { method: 'POST', body: JSON.stringify(data) }),
   deleteMemory: (id: string) => fetchApi(`/memory/${id}`, { method: 'DELETE' }),
 
   // ── Skills ──
-  getSkills: () => fetchApi<Skill[]>('/skills'),
-  createSkill: (data: Partial<Skill>) => fetchApi<Skill>('/skills', { method: 'POST', body: JSON.stringify(data) }),
+  getSkills: () => fetchApi<Skill[]>('/skills/'),
+  createSkill: (data: Partial<Skill>) => fetchApi<Skill>('/skills/', { method: 'POST', body: JSON.stringify(data) }),
   deleteSkill: (id: string) => fetchApi(`/skills/${id}`, { method: 'DELETE' }),
 
   // ── Files ──

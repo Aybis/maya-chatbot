@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Code, FileText, Image, Braces, Copy, Check } from 'lucide-react'
+import { Code, FileText, Image as ImageIcon, BracketsCurly, Copy, Check } from '@phosphor-icons/react'
 
 interface Artifact {
   type: 'code' | 'svg' | 'html' | 'json' | 'markdown'
@@ -17,15 +17,15 @@ export default function ArtifactRenderer({ artifact }: Props) {
 
   if (type === 'code') {
     return (
-      <div className="rounded-xl overflow-hidden bg-warm-900 border border-warm-800">
-        <div className="flex items-center justify-between px-4 py-2.5 bg-warm-800">
-          <div className="flex items-center gap-2 text-sm text-warm-300">
+      <div className="overflow-hidden rounded-xl border border-ink bg-ink">
+        <div className="flex items-center justify-between bg-ink/90 px-4 py-2.5">
+          <div className="flex items-center gap-2 text-sm text-canvas/70">
             <Code size={14} />
             <span className="font-mono text-xs">{title || language || 'code'}</span>
           </div>
           <CopyButton code={content} />
         </div>
-        <pre className="p-4 overflow-x-auto">
+        <pre className="overflow-x-auto p-4">
           <code className={`language-${language || 'text'} text-sm`}>{content}</code>
         </pre>
       </div>
@@ -34,15 +34,15 @@ export default function ArtifactRenderer({ artifact }: Props) {
 
   if (type === 'html') {
     return (
-      <div className="rounded-xl overflow-hidden border border-warm-200">
-        <div className="bg-warm-100 px-4 py-2 flex items-center gap-2 text-sm text-warm-600">
+      <div className="overflow-hidden rounded-xl hairline">
+        <div className="flex items-center gap-2 bg-surface px-4 py-2 text-sm text-muted">
           <FileText size={14} />
           <span>{title || 'HTML Preview'}</span>
         </div>
-        <div className="bg-white p-4">
+        <div className="bg-canvas p-4">
           <iframe
             srcDoc={content}
-            className="w-full h-64 border-0 rounded-lg"
+            className="h-64 w-full rounded-lg border-0"
             sandbox="allow-scripts"
             title="HTML Artifact"
           />
@@ -53,13 +53,13 @@ export default function ArtifactRenderer({ artifact }: Props) {
 
   if (type === 'svg') {
     return (
-      <div className="rounded-xl overflow-hidden border border-warm-200">
-        <div className="bg-warm-100 px-4 py-2 flex items-center gap-2 text-sm text-warm-600">
-          <Image size={14} />
+      <div className="overflow-hidden rounded-xl hairline">
+        <div className="flex items-center gap-2 bg-surface px-4 py-2 text-sm text-muted">
+          <ImageIcon size={14} />
           <span>{title || 'SVG'}</span>
         </div>
         <div
-          className="bg-white p-6 flex items-center justify-center"
+          className="flex items-center justify-center bg-canvas p-6"
           dangerouslySetInnerHTML={{ __html: content }}
         />
       </div>
@@ -68,12 +68,12 @@ export default function ArtifactRenderer({ artifact }: Props) {
 
   if (type === 'json') {
     return (
-      <div className="rounded-xl overflow-hidden border border-warm-200">
-        <div className="bg-warm-100 px-4 py-2 flex items-center gap-2 text-sm text-warm-600">
-          <Braces size={14} />
+      <div className="overflow-hidden rounded-xl hairline">
+        <div className="flex items-center gap-2 bg-surface px-4 py-2 text-sm text-muted">
+          <BracketsCurly size={14} />
           <span>{title || 'JSON'}</span>
         </div>
-        <pre className="bg-warm-900 p-4 overflow-x-auto text-sm text-warm-200">
+        <pre className="overflow-x-auto bg-ink p-4 text-sm text-canvas/90">
           {JSON.stringify(JSON.parse(content), null, 2)}
         </pre>
       </div>
@@ -95,7 +95,7 @@ function CopyButton({ code }: { code: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="text-xs text-warm-400 hover:text-warm-200 flex items-center gap-1 px-2 py-1 rounded hover:bg-warm-700 transition-colors"
+      className="flex items-center gap-1 rounded px-2 py-1 text-xs text-canvas/60 transition-colors hover:bg-canvas/10 hover:text-canvas"
     >
       {copied ? <Check size={12} /> : <Copy size={12} />}
       {copied ? 'Copied!' : 'Copy'}
