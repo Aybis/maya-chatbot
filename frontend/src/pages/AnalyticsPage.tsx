@@ -1,19 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { api } from '../api/client'
+import { api, type UsageSummary } from '../api/client'
 import { DollarSign, BarChart3, Cpu, TrendingUp } from 'lucide-react'
-
-interface UsageSummary {
-  total_requests: number
-  total_prompt_tokens: number
-  total_completion_tokens: number
-  total_cost: number
-  by_provider: Record<string, {
-    requests: number
-    prompt_tokens: number
-    completion_tokens: number
-    cost: number
-  }>
-}
 
 export default function AnalyticsPage() {
   const { data: todayData } = useQuery({

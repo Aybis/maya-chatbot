@@ -1,7 +1,27 @@
+@import "@fontsource-variable/geist";
+@import "@fontsource/geist-mono";
 @import "tailwindcss";
 @import "highlight.js/styles/github-dark.css";
 
 @theme {
+  /* ── Premium minimalist palette (white, clean, one accent) ── */
+  --color-canvas: #ffffff;
+  --color-surface: #f9f9f8;
+  --color-surface-2: #f4f4f3;
+  --color-line: #eaeaea;
+  --color-line-soft: #f0f0ef;
+  --color-ink: #111111;
+  --color-ink-2: #2f3437;
+  --color-muted: #787774;
+  --color-muted-2: #a1a19e;
+  --color-accent: #4a6cf7;        /* single desaturated blue accent */
+  --color-accent-ink: #3b5bdb;
+  --color-accent-soft: #eef1fe;
+
+  --font-sans: "Geist Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", monospace;
+
+  /* ── Legacy palette (app pages in transition; kept for backward compat) ── */
   --color-cream-50: #faf9f6;
   --color-cream-100: #f5f3ed;
   --color-cream-200: #ebe7df;
@@ -25,48 +45,61 @@
   --color-warm-800: #3d362f;
   --color-warm-900: #2a2520;
   --color-warm-950: #1a1714;
-  --font-serif: 'Georgia', 'Times New Roman', serif;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-warm-400) transparent;
+  scrollbar-color: var(--color-muted-2) transparent;
 }
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background-color: var(--color-muted-2); border-radius: 3px; }
 
-*::-webkit-scrollbar {
-  width: 6px;
-}
-
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-*::-webkit-scrollbar-thumb {
-  background-color: var(--color-warm-400);
-  border-radius: 3px;
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   font-family: var(--font-sans);
-  background: var(--color-cream-50);
-  color: var(--color-warm-900);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
+/* Utility: hairline border matching the design system */
+.hairline {
+  border: 1px solid var(--color-line);
+}
+
+/* Utility: soft lifted surface (ultra-diffuse, near-invisible shadow) */
+.lift {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02), 0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+/* Utility: modest entrance animation respecting reduced motion */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.reveal {
+  animation: rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Code + prose styling */
 .prose pre {
-  background: var(--color-warm-900) !important;
-  border-radius: 12px;
+  background: var(--color-ink) !important;
+  border-radius: 10px;
+  border: 1px solid var(--color-line);
 }
-
 .prose code {
-  color: var(--color-amber-400);
+  color: var(--color-accent-ink);
   font-weight: 500;
-  background: var(--color-warm-100);
+  background: var(--color-surface-2);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.875em;
 }
-
 .prose pre code {
   background: transparent;
   padding: 0;

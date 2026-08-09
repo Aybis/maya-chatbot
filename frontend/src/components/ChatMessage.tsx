@@ -2,7 +2,7 @@ import { Message } from '../types'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
-import { User } from 'lucide-react'
+import { User, Bot } from 'lucide-react'
 import ArtifactRenderer from './ArtifactRenderer'
 
 interface Props {

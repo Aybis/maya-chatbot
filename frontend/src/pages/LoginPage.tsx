@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../stores/auth'
-import { Sparkles } from 'lucide-react'
+import { api } from '../api/client'
+import Logo from '../components/Logo'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -17,74 +18,60 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const res = await fetch('/api/v1/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-      
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.detail || 'Login failed')
-        return
-      }
-
-      setAuth(data.token, data.user)
-      navigate('/')
+      const data = await api.login(email, password)
+      setAuth(
+        { access_token: data.access_token, refresh_token: data.refresh_token },
+        data.user,
+        data.organizations,
+      )
+      navigate('/app')
     } catch (err) {
-      setError('Network error. Is the backend running?')
+      setError('Invalid credentials or backend unreachable.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-cream-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo */}
+    <div className="min-h-[100dvh] bg-canvas flex items-center justify-center p-6">
+      <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 mx-auto mb-4 bg-amber-400 rounded-2xl flex items-center justify-center">
-            <Sparkles className="w-7 h-7 text-warm-900" />
-          </div>
-          <h1 className="text-3xl font-serif font-semibold text-warm-800">
-            Welcome back
-          </h1>
-          <p className="text-warm-500 mt-2">Sign in to your Maya Chat account</p>
+          <Link to="/" className="inline-flex items-center gap-2 mb-6">
+            <Logo size={34} />
+            <span className="text-lg font-semibold tracking-tight text-ink">Maya</span>
+          </Link>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">Welcome back</h1>
+          <p className="text-muted mt-2 text-sm">Sign in to your workspace</p>
         </div>
 
-        {/* Form */}
-        <div className="bg-white rounded-2xl border border-warm-200 p-8 shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="rounded-2xl hairline bg-canvas p-7 lift">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-warm-700 mb-1.5">
-                Email
-              </label>
+              <label className="block text-sm font-medium text-ink mb-1.5">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full bg-warm-50 border border-warm-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-300 focus:ring-2 focus:ring-amber-100"
+                placeholder="you@company.com"
+                className="w-full bg-surface hairline rounded-lg px-3.5 py-2.5 text-sm text-ink placeholder:text-muted-2 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-warm-700 mb-1.5">
-                Password
-              </label>
+              <label className="block text-sm font-medium text-ink mb-1.5">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full bg-warm-50 border border-warm-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-300 focus:ring-2 focus:ring-amber-100"
+                className="w-full bg-surface hairline rounded-lg px-3.5 py-2.5 text-sm text-ink placeholder:text-muted-2 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
                 required
               />
             </div>
 
             {error && (
-              <div className="bg-red-50 text-red-600 text-sm rounded-lg p-3 border border-red-100">
+              <div className="rounded-lg bg-[#FDEBEC] text-[#9F2F2D] text-sm px-3.5 py-2.5">
                 {error}
               </div>
             )}
@@ -92,15 +79,15 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-amber-400 hover:bg-amber-500 text-warm-900 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50"
+              className="w-full rounded-[6px] bg-ink py-2.5 text-sm font-medium text-canvas transition-transform hover:scale-[0.98] active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
 
-          <p className="text-center text-sm text-warm-500 mt-6">
+          <p className="text-center text-sm text-muted mt-6">
             Don't have an account?{' '}
-            <Link to="/register" className="text-amber-600 hover:text-amber-700 font-medium">
+            <Link to="/register" className="text-accent-ink font-medium hover:opacity-80">
               Create one
             </Link>
           </p>

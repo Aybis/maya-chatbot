@@ -8,15 +8,15 @@ interface Props {
 
 export default function ProtectedRoute({ children }: Props) {
   const navigate = useNavigate()
-  const token = useAuthStore((s) => s.token)
+  const accessToken = useAuthStore((s) => s.accessToken)
 
   useEffect(() => {
-    if (!token) {
+    if (!accessToken) {
       navigate('/login')
     }
-  }, [token, navigate])
+  }, [accessToken, navigate])
 
-  if (!token) return null
+  if (!accessToken) return null
 
   return <>{children}</>
 }

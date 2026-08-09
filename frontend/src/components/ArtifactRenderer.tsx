@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Code, FileText, Image, Braces, Copy, Check } from 'lucide-react'
 
 interface Artifact {
-  type: 'code' | 'svg' | 'html' | 'json'
+  type: 'code' | 'svg' | 'html' | 'json' | 'markdown'
   content: string
   language?: string
   title?: string

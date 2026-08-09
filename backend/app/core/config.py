@@ -31,6 +31,12 @@ class Settings(BaseSettings):
     track_tokens: bool = True
     cost_alert_threshold: float = 5.0
 
+    # Auth
+    jwt_secret: str = "your-secret-key-change-in-production"
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 15
+    refresh_token_expire_days: int = 30
+
     web_search_enabled: bool = True
 
     class Config:

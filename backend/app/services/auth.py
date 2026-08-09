@@ -1,61 +1,121 @@
 import hashlib
 import hmac
 import secrets
-import time
 from datetime import datetime, timedelta
 from typing import Optional
+
 import jwt
-from fastapi import HTTPException, Security, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Depends, HTTPException, Request, Security
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
 from app.core.config import settings
+from app.db.database import get_db
 
-security = HTTPBearer()
-
-# In production, use a proper secret key from env
-JWT_SECRET = "your-secret-key-change-in-production"
-JWT_ALGORITHM = "HS256"
-JWT_EXPIRATION_HOURS = 24 * 7  # 7 days
+security = HTTPBearer(auto_error=False)
 
 
 def hash_password(password: str) -> str:
     """Hash password using PBKDF2."""
     salt = secrets.token_hex(16)
-    hash_obj = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
+    hash_obj = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 100000)
     return f"{salt}:{hash_obj.hex()}"
 
 
 def verify_password(password: str, password_hash: str) -> bool:
     """Verify password against hash."""
     salt, hash_hex = password_hash.split(":")
-    hash_obj = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
+    hash_obj = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 100000)
     return hmac.compare_digest(hash_obj.hex(), hash_hex)
 
 
-def create_token(user_id: str) -> str:
-    """Create JWT token."""
-    payload = {
-        "sub": user_id,
-        "exp": datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS),
-        "iat": datetime.utcnow(),
-    }
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+def _encode(payload: dict, expires_delta: timedelta) -> str:
+    data = dict(payload)
+    data["exp"] = datetime.utcnow() + expires_delta
+    data["iat"] = datetime.utcnow()
+    return jwt.encode(data, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
-def decode_token(token: str) -> str:
-    """Decode JWT token and return user_id."""
+def create_access_token(user_id: str, org_id: Optional[str] = None) -> str:
+    return _encode(
+        {"sub": user_id, "type": "access", "org": org_id},
+        timedelta(minutes=settings.access_token_expire_minutes),
+    )
+
+
+def create_refresh_token(user_id: str, org_id: Optional[str] = None) -> str:
+    return _encode(
+        {"sub": user_id, "type": "refresh", "org": org_id},
+        timedelta(days=settings.refresh_token_expire_days),
+    )
+
+
+def decode_token(token: str, expected_type: str = "access") -> Optional[dict]:
+    """Decode + validate a JWT. Returns payload or None (instead of raising)."""
     try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        return payload["sub"]
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+    except jwt.PyJWTError:
+        return None
+    if payload.get("type") != expected_type:
+        return None
+    return payload
 
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ) -> str:
-    """Dependency to get current authenticated user."""
-    token = credentials.credentials
-    user_id = decode_token(token)
-    return user_id
+    """Dependency: return the user_id from a valid access token."""
+    if credentials is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    payload = decode_token(credentials.credentials, "access")
+    if payload is None:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    return payload["sub"]
+
+
+async def get_org_context(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials = Security(security),
+) -> dict:
+    """Dependency: resolve the active organization for a request.
+
+    Determined by (in order) the ``X-Org-Id`` header, the token's ``org``
+    claim, or the ``org_id`` query param. Returns:
+    ``{"user_id", "org_id", "membership_role"}``. Raises 403 if the user is
+    not a member of the resolved org, or 400 if no org can be resolved.
+    """
+    if credentials is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    payload = decode_token(credentials.credentials, "access")
+    if payload is None:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    user_id = payload["sub"]
+
+    org_id = request.headers.get("X-Org-Id")
+    if not org_id:
+        org_id = request.query_params.get("org_id")
+    if not org_id:
+        org_id = payload.get("org")
+
+    if not org_id:
+        raise HTTPException(status_code=400, detail="No organization context provided")
+
+    from app.services.organizations import get_membership
+
+    membership = None
+    async for db in get_db():
+        membership = await get_membership(db, org_id, user_id)
+        break
+    if not membership:
+        raise HTTPException(status_code=403, detail="Not a member of this organization")
+
+    return {"user_id": user_id, "org_id": org_id, "membership_role": membership["role"]}
+
+
+async def get_current_user_soft(
+    credentials: HTTPAuthorizationCredentials = Security(security),
+) -> Optional[str]:
+    """Optional auth: return user_id or None (no error)."""
+    if credentials is None:
+        return None
+    payload = decode_token(credentials.credentials, "access")
+    return payload["sub"] if payload else None

@@ -1,8 +1,9 @@
 from fastapi import APIRouter
-from app.api.routes import projects, chat, memory, skills, files, analytics, auth
+from app.api.routes import projects, chat, memory, skills, files, analytics, auth, providers
 
 router = APIRouter()
 router.include_router(auth.router, prefix="/auth", tags=["auth"])
+router.include_router(providers.router, prefix="/providers", tags=["providers"])
 router.include_router(projects.router, prefix="/projects", tags=["projects"])
 router.include_router(chat.router, prefix="/chat", tags=["chat"])
 router.include_router(memory.router, prefix="/memory", tags=["memory"])

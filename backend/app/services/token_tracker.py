@@ -34,6 +34,7 @@ async def track_usage(
     prompt_tokens: int,
     completion_tokens: int,
     user_id: str = None,
+    organization_id: str = None,
 ):
     """Track token usage and calculate cost."""
 
@@ -47,10 +48,11 @@ async def track_usage(
     async for db in get_db():
         await db.execute(
             """INSERT INTO token_usage 
-               (id, user_id, conversation_id, provider, model, prompt_tokens, completion_tokens, input_cost, output_cost, total_cost, created_at) 
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               (id, organization_id, user_id, conversation_id, provider, model, prompt_tokens, completion_tokens, input_cost, output_cost, total_cost, created_at) 
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 str(uuid.uuid4()),
+                organization_id,
                 user_id,
                 conversation_id,
                 provider,
@@ -66,8 +68,8 @@ async def track_usage(
         await db.commit()
 
 
-async def get_usage_summary(user_id: str, start_date: date = None, end_date: date = None) -> dict:
-    """Get aggregated usage summary for a user."""
+async def get_usage_summary(org_id: str, start_date: date = None, end_date: date = None) -> dict:
+    """Get aggregated usage summary for an organization."""
     if not start_date:
         start_date = date.today()
     if not end_date:
@@ -81,10 +83,10 @@ async def get_usage_summary(user_id: str, start_date: date = None, end_date: dat
                 SUM(completion_tokens) as total_completion_tokens,
                 SUM(total_cost) as total_cost,
                 provider
-               FROM token_usage 
-               WHERE user_id = ? AND DATE(created_at) BETWEEN ? AND ?
-               GROUP BY provider""",
-            (user_id, start_date.isoformat(), end_date.isoformat())
+              FROM token_usage 
+              WHERE organization_id = ? AND DATE(created_at) BETWEEN ? AND ?
+              GROUP BY provider""",
+            (org_id, start_date.isoformat(), end_date.isoformat())
         )
         rows = await cursor.fetchall()
 
@@ -111,19 +113,19 @@ async def get_usage_summary(user_id: str, start_date: date = None, end_date: dat
         return summary
 
 
-async def get_daily_usage(user_id: str, days: int = 30) -> list[dict]:
-    """Get daily usage trend for a user."""
+async def get_daily_usage(org_id: str, days: int = 30) -> list[dict]:
+    """Get daily usage trend for an organization."""
     async for db in get_db():
         cursor = await db.execute(
             """SELECT 
                 DATE(created_at) as date,
                 SUM(total_cost) as cost,
                 SUM(prompt_tokens + completion_tokens) as tokens
-               FROM token_usage 
-               WHERE user_id = ? AND created_at >= datetime('now', '-' || ? || ' days')
-               GROUP BY DATE(created_at)
-               ORDER BY date""",
-            (user_id, str(days),)
+              FROM token_usage 
+              WHERE organization_id = ? AND created_at >= datetime('now', '-' || ? || ' days')
+              GROUP BY DATE(created_at)
+              ORDER BY date""",
+            (org_id, str(days),)
         )
         rows = await cursor.fetchall()
         return [dict(row) for row in rows]
