@@ -87,3 +87,33 @@ class ArtifactData(BaseModel):
     content: str
     language: Optional[str] = None
     title: Optional[str] = None
+
+
+class PromptTemplateBase(BaseModel):
+    name: str
+    description: str = ""
+    category: str = "general"
+    content: str
+    variables: List[str] = []
+    is_public: bool = False
+
+
+class PromptTemplateCreate(PromptTemplateBase):
+    pass
+
+
+class PromptTemplateUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    content: Optional[str] = None
+    variables: Optional[List[str]] = None
+    is_public: Optional[bool] = None
+
+
+class PromptTemplate(PromptTemplateBase):
+    id: str
+    organization_id: str
+    created_by: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   ChatCircle, Folder, Brain, MagicWand, ChartBar, GearSix, Plus, SignOut,
-  CaretDown, Check, Users, Lightning, Building,
+  CaretDown, Check, Users, Lightning, Building, NotePencil,
 } from '@phosphor-icons/react'
 import { useAuthStore } from '../stores/auth'
 import Logo from './Logo'
@@ -10,6 +10,7 @@ import Logo from './Logo'
 const navItems = [
   { to: '/app', icon: ChatCircle, label: 'Chat' },
   { to: '/app/projects', icon: Folder, label: 'Projects' },
+  { to: '/app/prompts', icon: NotePencil, label: 'Prompts' },
   { to: '/app/memory', icon: Brain, label: 'Memory' },
   { to: '/app/skills', icon: MagicWand, label: 'Skills' },
   { to: '/app/analytics', icon: ChartBar, label: 'Analytics' },

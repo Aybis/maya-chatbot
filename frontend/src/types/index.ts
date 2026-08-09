@@ -55,3 +55,17 @@ export interface Skill {
   is_active: boolean
   created_at: string
 }
+
+export interface PromptTemplate {
+  id: string
+  organization_id: string
+  name: string
+  description: string
+  category: string
+  content: string
+  variables: string[]
+  is_public: boolean
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}

@@ -6,15 +6,16 @@
 
 ## Current Status
 
-**Phase:** A — COMPLETE. Ready for Phase B (Claude features).
-**Last updated:** End of Phase A (before Phase B)
+**Phase:** B — IN PROGRESS (B1 Prompt Library complete; B2 API Keys next)
+**Last updated:** Phase B, B1 done
 
 <!-- UPDATE BELOW as you work. Keep this section current. -->
 
 ### In Progress
-- (none — starting Phase B)
+- **B1 Prompt Library** — DONE (backend + frontend + verified). See Completed.
 
 ### Completed
+- [x] **B1 Prompt Library** — `prompt_templates` table (org-scoped, categories + variables JSON + is_public); CRUD routes at `/api/v1/prompts/` (+ list-by-category, `/categories`, PUT update); PromptsPage (`/app/prompts`) with category filter, create/edit/delete/copy; sidebar entry. Verified end-to-end via live API (create/list/get/update/by-category/categories/delete) + `npm run build` (tsc clean).
 - [x] Project recon
 - [x] Docs scaffold (this file + AGENTS.md + ARCHITECT.md + SKILLS.md)
 - [x] Design direction locked (taste-skill: minimalist/premium, VARIANCE 5 / MOTION 3 / DENSITY 2)

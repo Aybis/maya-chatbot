@@ -196,6 +196,23 @@ async def init_db():
                 FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE CASCADE,
                 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
             );
+
+            -- Prompt Library (Phase B1): reusable org-scoped prompt templates.
+            CREATE TABLE IF NOT EXISTS prompt_templates (
+                id TEXT PRIMARY KEY,
+                organization_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT,
+                category TEXT DEFAULT 'general',
+                content TEXT NOT NULL,
+                variables TEXT DEFAULT '[]',      -- JSON: list of variable names in the content
+                is_public BOOLEAN DEFAULT 0,
+                created_by TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+                FOREIGN KEY (created_by) REFERENCES users(id)
+            );
             """
         )
         await db.commit()
@@ -210,7 +227,7 @@ async def _ensure_columns(db):
     created by an older schema we add the new columns here. This makes upgrades
     non-destructive.
     """
-    target_tables = ("projects", "conversations", "memories", "skills", "files", "token_usage")
+    target_tables = ("projects", "conversations", "memories", "skills", "files", "token_usage", "prompt_templates")
     for table in target_tables:
         cur = await db.execute(f"PRAGMA table_info({table})")
         cols = {row[1] for row in await cur.fetchall()}
@@ -238,7 +255,7 @@ async def _migrate_legacy(db):
     if len(orgs) != 1:
         return
     org_id = orgs[0]["id"]
-    for table in ("projects", "conversations", "memories", "skills", "files", "token_usage"):
+    for table in ("projects", "conversations", "memories", "skills", "files", "token_usage", "prompt_templates"):
         try:
             await db.execute(
                 f"UPDATE {table} SET organization_id = ? WHERE organization_id IS NULL",

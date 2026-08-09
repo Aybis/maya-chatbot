@@ -1,4 +1,4 @@
-import type { Project, Conversation, Message, Memory, Skill } from '../types'
+import type { Project, Conversation, Message, Memory, Skill, PromptTemplate } from '../types'
 import { useAuthStore, type User, type Organization } from '../stores/auth'
 
 const BASE_URL = '/api/v1'
@@ -130,6 +130,16 @@ export const api = {
   getSkills: () => fetchApi<Skill[]>('/skills/'),
   createSkill: (data: Partial<Skill>) => fetchApi<Skill>('/skills/', { method: 'POST', body: JSON.stringify(data) }),
   deleteSkill: (id: string) => fetchApi(`/skills/${id}`, { method: 'DELETE' }),
+
+  // ── Prompts ──
+  getPrompts: (category?: string) => {
+    const params = category ? `?category=${encodeURIComponent(category)}` : ''
+    return fetchApi<PromptTemplate[]>(`/prompts/${params}`)
+  },
+  getPromptCategories: () => fetchApi<string[]>('/prompts/categories'),
+  createPrompt: (data: Partial<PromptTemplate>) => fetchApi<PromptTemplate>('/prompts/', { method: 'POST', body: JSON.stringify(data) }),
+  updatePrompt: (id: string, data: Partial<PromptTemplate>) => fetchApi<PromptTemplate>(`/prompts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deletePrompt: (id: string) => fetchApi(`/prompts/${id}`, { method: 'DELETE' }),
 
   // ── Files ──
   uploadFile: (file: File, conversationId?: string) => {
