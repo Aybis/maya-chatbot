@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
 from app.models.schemas import ApiKey, ApiKeyCreate, ApiKeyCreated
 from app.db.database import get_db
+from app.services.audit import log_audit
 from app.services.auth import get_org_context
 from app.services.api_keys import generate_api_key
 
@@ -41,6 +42,7 @@ async def create_api_key(body: ApiKeyCreate, ctx: dict = Depends(get_org_context
             ),
         )
         await db.commit()
+        await log_audit(db, ctx["org_id"], "api_key.create", user_id=ctx["user_id"], resource_type="api_key", resource_id=key_id, metadata={"name": body.name, "prefix": display_prefix})
     return ApiKeyCreated(
         id=key_id,
         name=body.name,
@@ -76,4 +78,5 @@ async def revoke_api_key(key_id: str, ctx: dict = Depends(get_org_context)):
             (key_id, ctx["org_id"]),
         )
         await db.commit()
+        await log_audit(db, ctx["org_id"], "api_key.revoke", user_id=ctx["user_id"], resource_type="api_key", resource_id=key_id)
         return {"status": "revoked"}

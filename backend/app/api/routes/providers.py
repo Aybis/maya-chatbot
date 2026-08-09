@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.db.database import get_db
+from app.services.audit import log_audit
 from app.services.auth import get_org_context
 from app.services.providers import (
     create_provider,
@@ -54,6 +55,7 @@ async def add_provider(request: dict, ctx: dict = Depends(get_org_context)):
                 raise
         else:
             await store_models(db, provider["id"], ctx["org_id"], [])
+        await log_audit(db, ctx["org_id"], "provider.add", user_id=ctx["user_id"], resource_type="provider", resource_id=provider["id"], metadata={"name": name, "base_url": base_url})
         return {**_provider_body(provider), "models_discovered": connect}
 
 
@@ -88,6 +90,7 @@ async def remove_provider(provider_id: str, ctx: dict = Depends(get_org_context)
         if not provider:
             raise HTTPException(status_code=404, detail="Provider not found")
         await delete_provider(db, provider_id, ctx["org_id"])
+        await log_audit(db, ctx["org_id"], "provider.remove", user_id=ctx["user_id"], resource_type="provider", resource_id=provider_id, metadata={"name": provider["name"]})
         return {"status": "deleted"}
 
 

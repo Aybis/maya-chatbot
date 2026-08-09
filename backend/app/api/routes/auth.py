@@ -5,6 +5,7 @@ import re
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.db.database import get_db
+from app.services.audit import log_audit
 from app.services.auth import (
     create_access_token,
     create_refresh_token,
@@ -70,6 +71,7 @@ async def register(request: dict):
             (user_id, email, username, hash_password(password)),
         )
         org = await create_organization(db, org_name, _slugify(org_name), user_id)
+        await log_audit(db, org["id"], "auth.register", user_id=user_id, resource_type="organization", resource_id=org["id"])
         await db.commit()
 
         access = create_access_token(user_id, org["id"])
@@ -102,6 +104,8 @@ async def login(request: dict):
         await ensure_user_org(db, row["id"], row["username"])
         orgs = await list_user_orgs(db, row["id"])
         active_org = orgs[0]["id"] if orgs else None
+        if active_org:
+            await log_audit(db, active_org, "auth.login", user_id=row["id"], resource_type="user", resource_id=row["id"])
         return {
             "access_token": create_access_token(row["id"], active_org),
             "refresh_token": create_refresh_token(row["id"], active_org),
@@ -156,6 +160,7 @@ async def new_organization(request: dict, user_id: str = Depends(get_current_use
         raise HTTPException(status_code=400, detail="Organization name required")
     async for db in get_db():
         org = await create_organization(db, name, _slugify(name), user_id)
+        await log_audit(db, org["id"], "org.create", user_id=user_id, resource_type="organization", resource_id=org["id"], metadata={"name": name})
         await db.commit()
         return _org_body(org)
 
@@ -191,6 +196,7 @@ async def invite(request: dict, org_id: str, user_id: str = Depends(get_current_
         if not email or role not in {"member", "admin"}:
             raise HTTPException(status_code=400, detail="Valid email and role required")
         inv = await create_invitation(db, org_id, email, role, user_id)
+        await log_audit(db, org_id, "member.invite", user_id=user_id, resource_type="invitation", resource_id=inv.get("id"), metadata={"email": email, "role": role})
         await db.commit()
         return inv
 
@@ -221,6 +227,7 @@ async def set_member_role(
         if actor["role"] == "admin" and role == "owner":
             raise HTTPException(status_code=403, detail="Only an owner can grant owner role")
         await update_membership_role(db, org_id, target_user_id, role)
+        await log_audit(db, org_id, "member.role_change", user_id=user_id, resource_type="member", resource_id=target_user_id, metadata={"role": role})
         await db.commit()
         return {"ok": True}
 
@@ -236,6 +243,7 @@ async def remove_member(
         if target_user_id == user_id:
             raise HTTPException(status_code=400, detail="Cannot remove yourself")
         await remove_membership(db, org_id, target_user_id)
+        await log_audit(db, org_id, "member.remove", user_id=user_id, resource_type="member", resource_id=target_user_id)
         await db.commit()
         return {"ok": True}
 

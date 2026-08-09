@@ -230,6 +230,22 @@ async def init_db():
                 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
                 FOREIGN KEY (created_by) REFERENCES users(id)
             );
+
+            -- Audit Logs (Phase B3): security-relevant actions per org (compliance).
+            CREATE TABLE IF NOT EXISTS audit_logs (
+                id TEXT PRIMARY KEY,
+                organization_id TEXT NOT NULL,
+                user_id TEXT,                     -- actor (NULL for system/unauthenticated)
+                action TEXT NOT NULL,             -- e.g. "auth.login", "org.create", "member.invite"
+                resource_type TEXT,               -- e.g. "organization", "api_key", "member"
+                resource_id TEXT,
+                ip TEXT,
+                user_agent TEXT,
+                metadata TEXT DEFAULT '{}',       -- JSON extra context
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
             """
         )
         await db.commit()
@@ -244,7 +260,7 @@ async def _ensure_columns(db):
     created by an older schema we add the new columns here. This makes upgrades
     non-destructive.
     """
-    target_tables = ("projects", "conversations", "memories", "skills", "files", "token_usage", "prompt_templates", "api_keys")
+    target_tables = ("projects", "conversations", "memories", "skills", "files", "token_usage", "prompt_templates", "api_keys", "audit_logs")
     for table in target_tables:
         cur = await db.execute(f"PRAGMA table_info({table})")
         cols = {row[1] for row in await cur.fetchall()}
@@ -272,7 +288,7 @@ async def _migrate_legacy(db):
     if len(orgs) != 1:
         return
     org_id = orgs[0]["id"]
-    for table in ("projects", "conversations", "memories", "skills", "files", "token_usage", "prompt_templates", "api_keys"):
+    for table in ("projects", "conversations", "memories", "skills", "files", "token_usage", "prompt_templates", "api_keys", "audit_logs"):
         try:
             await db.execute(
                 f"UPDATE {table} SET organization_id = ? WHERE organization_id IS NULL",

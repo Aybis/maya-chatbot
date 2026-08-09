@@ -1,4 +1,4 @@
-import type { Project, Conversation, Message, Memory, Skill, PromptTemplate, ApiKey, ApiKeyCreated } from '../types'
+import type { Project, Conversation, Message, Memory, Skill, PromptTemplate, ApiKey, ApiKeyCreated, AuditLog } from '../types'
 import { useAuthStore, type User, type Organization } from '../stores/auth'
 
 const BASE_URL = '/api/v1'
@@ -146,6 +146,16 @@ export const api = {
   createApiKey: (data: { name: string; expires_at?: string | null }) =>
     fetchApi<ApiKeyCreated>('/api-keys/', { method: 'POST', body: JSON.stringify(data) }),
   revokeApiKey: (id: string) => fetchApi(`/api-keys/${id}`, { method: 'DELETE' }),
+
+  // ── Audit Logs ──
+  getAuditLogs: (action?: string, limit = 100, offset = 0) => {
+    const params = new URLSearchParams()
+    if (action) params.set('action', action)
+    params.set('limit', String(limit))
+    params.set('offset', String(offset))
+    return fetchApi<AuditLog[]>(`/audit/?${params}`)
+  },
+  getAuditActions: () => fetchApi<string[]>('/audit/actions'),
 
   // ── Files ──
   uploadFile: (file: File, conversationId?: string) => {

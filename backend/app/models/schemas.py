@@ -145,3 +145,16 @@ class ApiKey(BaseModel):
     expires_at: Optional[datetime] = None
     revoked: bool
     created_at: datetime
+
+
+class AuditLog(BaseModel):
+    id: str
+    organization_id: str
+    user_id: Optional[str] = None
+    action: str
+    resource_type: Optional[str] = None
+    resource_id: Optional[str] = None
+    ip: Optional[str] = None
+    user_agent: Optional[str] = None
+    metadata: dict = {}
+    created_at: datetime
