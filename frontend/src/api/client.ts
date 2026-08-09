@@ -49,7 +49,15 @@ async function fetchApi<T>(path: string, options?: RequestInit, _retry = false):
     window.location.href = '/login'
     throw new Error('Unauthorized')
   }
-  if (!res.ok) throw new Error(`API error: ${res.status}`)
+  if (!res.ok) {
+    // Try to surface the backend's detail message (e.g. "Invalid API key...")
+    let msg = `API error: ${res.status}`
+    try {
+      const body = await res.json()
+      if (body?.detail) msg = typeof body.detail === 'string' ? body.detail : JSON.stringify(body.detail)
+    } catch { /* non-JSON body */ }
+    throw new Error(msg)
+  }
   return res.json()
 }
 

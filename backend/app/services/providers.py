@@ -109,7 +109,9 @@ async def discover_models(base_url: str, api_key: str, timeout: float = 30.0) ->
         raise HTTPException(status_code=502, detail=f"Could not reach provider: {e}")
 
     if resp.status_code == 401 or resp.status_code == 403:
-        raise HTTPException(status_code=401, detail="Invalid API key for this provider")
+        # Use 400 (not 401) so this doesn't collide with the JWT auth flow
+        # (the frontend treats 401 as "access token expired" and tries to refresh).
+        raise HTTPException(status_code=400, detail="Invalid API key for this provider")
     if resp.status_code != 200:
         raise HTTPException(status_code=502, detail=f"Provider returned HTTP {resp.status_code}")
 
