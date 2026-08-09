@@ -90,23 +90,31 @@ async def get_org_context(
         raise HTTPException(status_code=401, detail="Invalid or expired token")
     user_id = payload["sub"]
 
+    from app.services.organizations import get_membership, list_user_orgs
+
+    # Resolve org: header > query param > token claim > user's first/default org.
     org_id = request.headers.get("X-Org-Id")
     if not org_id:
         org_id = request.query_params.get("org_id")
     if not org_id:
         org_id = payload.get("org")
 
-    if not org_id:
-        raise HTTPException(status_code=400, detail="No organization context provided")
-
-    from app.services.organizations import get_membership
-
     membership = None
     async for db in get_db():
-        membership = await get_membership(db, org_id, user_id)
+        if org_id:
+            membership = await get_membership(db, org_id, user_id)
+        if not membership:
+            # Fall back to the user's first org (or default) so requests with a
+            # context-less (e.g. legacy) token still resolve cleanly instead of 400.
+            orgs = await list_user_orgs(db, user_id)
+            if orgs:
+                candidate = next((o for o in orgs if o["is_default"]), orgs[0])
+                org_id = candidate["id"]
+                membership = await get_membership(db, org_id, user_id)
         break
+
     if not membership:
-        raise HTTPException(status_code=403, detail="Not a member of this organization")
+        raise HTTPException(status_code=403, detail="Not a member of any organization")
 
     return {"user_id": user_id, "org_id": org_id, "membership_role": membership["role"]}
 
