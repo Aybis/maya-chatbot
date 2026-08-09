@@ -18,12 +18,37 @@ async def websocket_chat(websocket: WebSocket):
     token = websocket.query_params.get("token")
     payload = decode_token(token, "access") if token else None
     user_id = payload["sub"] if payload else None
-    org_id = payload.get("org") if payload else None
 
-    if not user_id or not org_id:
+    if not user_id:
         await websocket.send_text(json.dumps({"type": "error", "content": "Unauthorized"}))
         await websocket.close(code=4401)
         return
+
+    # Resolve org with the same fallback chain as REST get_org_context:
+    # token claim -> X-Org-Id header -> org_id query param -> DB default org.
+    # (The REST conversation-create path uses get_org_context, so the WS must
+    # resolve the SAME org or the ownership check below spuriously fails.)
+    org_id = payload.get("org")
+    if not org_id:
+        org_id = websocket.headers.get("x-org-id")
+    if not org_id:
+        org_id = websocket.query_params.get("org_id")
+
+    from app.services.organizations import ensure_user_org, get_membership
+    resolved_org_id: str = ""
+    async for db in get_db():
+        membership = None
+        if org_id:
+            membership = await get_membership(db, org_id, user_id)
+        if not membership:
+            org_id = await ensure_user_org(db, user_id)
+            membership = await get_membership(db, org_id, user_id)
+        if not membership or not org_id:
+            await websocket.send_text(json.dumps({"type": "error", "content": "No organization"}))
+            await websocket.close(code=4403)
+            return
+        resolved_org_id = org_id
+        break
 
     async for db in get_db():
         try:
@@ -37,7 +62,7 @@ async def websocket_chat(websocket: WebSocket):
                     (request.conversation_id,),
                 )
                 row = await cursor.fetchone()
-                if not row or row["organization_id"] != org_id:
+                if not row or row["organization_id"] != resolved_org_id:
                     await websocket.send_text(json.dumps({"type": "error", "content": "Conversation not found"}))
                     continue
 
@@ -69,7 +94,7 @@ async def websocket_chat(websocket: WebSocket):
                 system_prompt = project["system_prompt"] if project else ""
 
                 # Memory context
-                memory_context = await get_memories_context(org_id, user_id)
+                memory_context = await get_memories_context(resolved_org_id, user_id)
                 if memory_context:
                     system_prompt = f"{system_prompt}\n\n{memory_context}" if system_prompt else memory_context
 
@@ -80,7 +105,7 @@ async def websocket_chat(websocket: WebSocket):
                     model=request.model or "",
                     system_prompt=system_prompt,
                     conversation_id=request.conversation_id,
-                    org_id=org_id,
+                    org_id=resolved_org_id,
                     user_id=user_id,
                 ):
                     parsed = json.loads(chunk)

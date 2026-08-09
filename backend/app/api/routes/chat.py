@@ -9,7 +9,7 @@ from app.services.auth import get_org_context
 router = APIRouter()
 
 
-@router.post("/", response_model=Conversation)
+@router.post("/conversations/", response_model=Conversation)
 async def create_conversation(conv: ConversationCreate, ctx: dict = Depends(get_org_context)):
     async for db in get_db():
         conv_id = str(uuid.uuid4())
@@ -29,7 +29,7 @@ async def create_conversation(conv: ConversationCreate, ctx: dict = Depends(get_
         )
 
 
-@router.get("/", response_model=list[Conversation])
+@router.get("/conversations/", response_model=list[Conversation])
 async def list_conversations(project_id: str = None, ctx: dict = Depends(get_org_context)):
     async for db in get_db():
         if project_id:
@@ -54,7 +54,7 @@ async def list_conversations(project_id: str = None, ctx: dict = Depends(get_org
         ]
 
 
-@router.get("/{conv_id}/messages", response_model=list[Message])
+@router.get("/conversations/{conv_id}/messages", response_model=list[Message])
 async def get_messages(conv_id: str, ctx: dict = Depends(get_org_context)):
     async for db in get_db():
         cursor = await db.execute(
@@ -84,7 +84,7 @@ async def get_messages(conv_id: str, ctx: dict = Depends(get_org_context)):
         ]
 
 
-@router.delete("/{conv_id}")
+@router.delete("/conversations/{conv_id}")
 async def delete_conversation(conv_id: str, ctx: dict = Depends(get_org_context)):
     async for db in get_db():
         await db.execute(

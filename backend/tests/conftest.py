@@ -42,6 +42,14 @@ async def db():
     await conn.close()
 
 
+@pytest.fixture
+def ws_client():
+    """Sync Starlette TestClient with in-process WebSocket support."""
+    from fastapi.testclient import TestClient
+    with TestClient(app) as c:
+        yield c
+
+
 # ── Helpers ──
 
 async def _register(client, email, username, password="Test123!"):
